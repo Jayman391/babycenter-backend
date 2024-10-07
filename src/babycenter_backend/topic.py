@@ -1,3 +1,5 @@
+import bertopic
+
 class Topic:
   def __init__(self):
     pass 

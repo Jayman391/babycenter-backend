@@ -11,6 +11,8 @@ dependencies = [
     "flask-cors",
     "bertopic",
     "torch==2.4.1",
+    "babycenterdb @ file:///Users/user/Desktop/babycenterdb-1.0.0-rc/dist/babycenterdb-0.1.0-py3-none-any.whl",
+    "shifterator>=0.3.0",
 ]
 requires-python = ">=3.12"
 readme = "README.md"
