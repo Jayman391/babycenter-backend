@@ -1,4 +1,4 @@
-from runner import Runner
+from babycenter_backend.runner import Runner
 from uuid import uuid4
 
 class User:
