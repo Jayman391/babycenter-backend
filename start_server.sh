@@ -1,1 +1,1 @@
-FLASK_DEBUG=1 pipenv run flask --app server run -p 5328
+FLASK_DEBUG=1 pdm run flask --app src/babycenter_backend/server run -p 5328

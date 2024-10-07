@@ -1,0 +1,36 @@
+[project]
+name = "babycenter-backend"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "Jason Lobell", email = "jasonlobell123@gmail.com"},
+]
+dependencies = [
+    "flask==3.0.3",
+    "paramiko",
+    "flask-cors",
+    "bertopic",
+    "torch==2.4.1",
+]
+requires-python = ">=3.12"
+readme = "README.md"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+
+[tool.pdm]
+distribution = true
+
+[[tool.pdm.source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[tool.pdm.dependencies]
+torch = {version = "2.4.1", source = "https://download.pytorch.org/whl/cu117"}
+
+[tool.pdm.dev-dependencies]
+dev = []
