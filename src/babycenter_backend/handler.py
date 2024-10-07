@@ -1,7 +1,10 @@
 from flask import Request, Response
-from query import Query, QueryFactory
-from topic import Topic, TopicFactory
-from user import User, UserFactory
+from werkzeug.datastructures import MultiDict
+
+from babycenter_backend.query import Query, QueryFactory
+from babycenter_backend.topic import Topic, TopicFactory
+from babycenter_backend.user import User, UserFactory
+
 
 class RequestHandler:
     def __init__(self):
@@ -10,7 +13,20 @@ class RequestHandler:
         self.query_factory = QueryFactory()
         self.topic_factory = TopicFactory()
         self.user_factory = UserFactory()
+
+    def handle(self, request : MultiDict) -> Response:
+        if request["request_type"] not in self.request_types:
+            raise ValueError("Invalid request type")
         
-    def handle(self, request : Request) -> Response:
-        pass
-   
+        request_type = request["request_type"]
+
+        request.pop("request_type")
+
+        user = self.users[request["user_id"]]
+
+        request.pop("user_id")
+
+        if request_type == "query":
+            query = self.query_factory.create_query(request)
+            user.query_data = user.runner.get_data(query)
+            return user.query_data
