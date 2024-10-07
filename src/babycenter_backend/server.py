@@ -1,7 +1,12 @@
 from flask import Flask, request, jsonify
 import paramiko
 from flask_cors import CORS
+from handler import RequestHandler
 
+handler = RequestHandler()
+query_factory = handler.query_factory
+topic_factory = handler.topic_factory
+user_factory = handler.user_factory
 
 app = Flask(__name__)
 CORS(app)  # This will enable CORS for all routes and origins

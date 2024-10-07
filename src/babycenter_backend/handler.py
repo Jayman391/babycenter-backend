@@ -1,7 +1,7 @@
 from flask import Request, Response
-from src.query import Query, QueryFactory
-from src.topic import Topic, TopicFactory
-from src.user import User
+from query import Query, QueryFactory
+from topic import Topic, TopicFactory
+from user import User, UserFactory
 
 class RequestHandler:
     def __init__(self):
@@ -9,9 +9,8 @@ class RequestHandler:
         self.users = {}
         self.query_factory = QueryFactory()
         self.topic_factory = TopicFactory()
+        self.user_factory = UserFactory()
+        
     def handle(self, request : Request) -> Response:
         pass
-    def create_user(self):
-        pass
-    def remove_user(self, user_id):
-        pass
+   
