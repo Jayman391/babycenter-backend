@@ -1,0 +1,1 @@
+FLASK_DEBUG=1 pipenv run flask --app server run -p 5328
