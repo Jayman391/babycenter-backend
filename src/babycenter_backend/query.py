@@ -3,6 +3,7 @@ import babycenterdb.filter
 from babycenterdb.query import Query
 from datetime import datetime
 import pandas as pd
+import json
 
 class QueryWrapper:
   def __init__(self, params : dict):
@@ -43,14 +44,21 @@ class QueryWrapper:
     elif len(groups) == 1:
         filters.append(babycenterdb.filter.GroupFilter(value=groups[0]))
     # Number of Comments Filter
-    filters.append(babycenterdb.filter.NumCommentsFilter(value=int(params['num_comments'])))
+    # Number of Comments Filter    
+    num_comments = int(params['num_comments'])
+
+    if num_comments > 0 and self.query_type == 'posts':
+        filters.append(babycenterdb.filter.NumCommentsFilter(value=num_comments))
+
     print(filters)
     return filters
 
   def execute(self) -> dict:
     data = pd.DataFrame(self.query.execute())
     data.fillna(int(0), inplace=True)
-    return data.to_dict(orient='records')
+    data['_id'] = data['_id'].astype(str)
+    data = data.to_dict(orient='records')
+    return data
   
 class QueryFactory:
   def __init__(self):
