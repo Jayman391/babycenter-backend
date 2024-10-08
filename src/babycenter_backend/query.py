@@ -1,47 +1,55 @@
 import babycenterdb
 import babycenterdb.filter
+from babycenterdb.query import Query
 from datetime import datetime
+import pandas as pd
 
-class Query:
+class QueryWrapper:
   def __init__(self, params : dict):
-    
-    if params["post_or_comment"] not in ["posts", "comments"]:
-            self.query_type = "posts"
-    params.pop("post_or_comment")
+   
+    self.query_type = params.pop("post_or_comment")
 
     if int(params["num_documents"]) <= 0:
-        self.num_documents = 10000
-    
-    params.pop("num_documents")
+      self.num_documents = 10000
+    self.num_documents =params.pop("num_documents")
 
     self.filters = self.build_filters(params)
-    self.query = babycenterdb.Query(self.query_type, filters=self.filters, limit=self.num_documents)
-
-  def build_filters(self, params : dict) -> dict:
-    
+    self.query = Query(collection=self.query_type, filters=self.filters, limit=int(self.num_documents))
+  
+  def build_filters(self, params: dict) -> dict:
     filters = []
+    # Country Filter
+    filters.append(babycenterdb.filter.CountryFilter(value=str(params['country']).upper()))
+    # Date Filter
+    start_date = datetime.strptime(params['start'], "%Y%m%d")  # Assuming start is in YYYYMMDD format
+    end_date = datetime.strptime(params['end'], "%Y%m%d")  # Assuming end is in YYYYMMDD format
+    filters.append(babycenterdb.filter.DateFilter(floor=start_date, ceiling=end_date))
+    # Keywords Filter
+    keywords = params['keywords']
+    keywords.remove('all')
 
-    for key, value in params.items():
-      if key == "country":
-        filters.append(babycenterdb.filter.CountryFilter(str(value).upper()))
-      if key == "start":
-        if params["end"] != "none":
-           filters.append(babycenterdb.filter.DateFilter(floor=datetime(value), ceil=datetime(params["end"])))
-      if key == "keywords":
-        pass
-      if key == "groups":
-        if str(value).contains(','):
-            filters.append(babycenterdb.filter.GroupFilter(value_list=str(value).split(',')))
-        elif value != "all":
-            filters.append(babycenterdb.filter.GroupFilter(value_list=[str(value)]))
-      if key == "num_comments":
-        pass
+    if len(keywords) > 1:
+        filters.append(babycenterdb.filter.TextFilter(value_list=keywords))
+    elif len(keywords) == 1:
+        filters.append(babycenterdb.filter.TextFilter(value=keywords[0]))
+    # Groups Filter
+    groups = params['groups']
+    groups.remove('all')
 
-  def execute(self):
-    pass
+    if len(groups) > 1:
+        filters.append(babycenterdb.filter.GroupFilter(value_list=groups))
+    elif len(groups) == 1:
+        filters.append(babycenterdb.filter.GroupFilter(value=groups[0]))
+    # Number of Comments Filter
+    filters.append(babycenterdb.filter.NumCommentsFilter(value=int(params['num_comments'])))
+    print(filters)
+    return filters
+
+  def execute(self) -> dict:
+    return pd.DataFrame(self.query.execute()).to_dict(orient='records')
 
 class QueryFactory:
   def __init__(self):
     pass
   def create_query(self, params):
-    return Query(params)
+    return QueryWrapper(params)

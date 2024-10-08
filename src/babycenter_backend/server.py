@@ -17,7 +17,6 @@ def query():
     try:
         # Extract query parameters from request.args
         country = request.args.get('country')
-        format = request.args.get('format')
         start = request.args.get('start')
         end = request.args.get('end')
         keywords = request.args.get('keywords', '').split(',')
@@ -36,7 +35,6 @@ def query():
             "request_type": "query",
             "user_id": user.id,
             "country": country,
-            "format": format,
             "start": start,
             "end": end,
             "keywords": keywords,
@@ -114,6 +112,3 @@ def auth(username, password):
     except Exception as e:
         return jsonify({"status": "error", "message": e})
 """
-
-if __name__ == '__main__':
-    app.run(debug=True)

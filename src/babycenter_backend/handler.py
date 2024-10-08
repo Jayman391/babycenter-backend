@@ -1,9 +1,8 @@
-from flask import Request, Response
 from werkzeug.datastructures import MultiDict
 
-from babycenter_backend.query import Query, QueryFactory
-from babycenter_backend.topic import Topic, TopicFactory
-from babycenter_backend.user import User, UserFactory
+from babycenter_backend.query import QueryFactory
+from babycenter_backend.topic import TopicFactory
+from babycenter_backend.user import UserFactory
 
 
 class RequestHandler:
@@ -14,7 +13,7 @@ class RequestHandler:
         self.topic_factory = TopicFactory()
         self.user_factory = UserFactory()
 
-    def handle(self, request : MultiDict) -> Response:
+    def handle(self, request : MultiDict):
         if request["request_type"] not in self.request_types:
             raise ValueError("Invalid request type")
         

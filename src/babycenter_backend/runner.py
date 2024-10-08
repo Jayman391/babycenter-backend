@@ -1,4 +1,4 @@
-from babycenter_backend.query import Query
+from babycenter_backend.query import QueryWrapper
 from babycenter_backend.topic import Topic
 from babycenter_backend.ngram import compute_ngrams
 from typing import Dict, List 
@@ -6,7 +6,7 @@ from typing import Dict, List
 class Runner:
   def __init__(self) -> None:
     pass
-  def get_data(self, query : Query) -> Dict[str, Dict[str, str]]:
+  def get_data(self, query : QueryWrapper) -> List[Dict]:
     return query.execute() 
   def run_topic_model(self, topic : Topic) -> Dict[str, Dict[str, str]]:
     pass
