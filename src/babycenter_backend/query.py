@@ -28,6 +28,8 @@ class QueryWrapper:
     keywords = params['keywords']
     keywords.remove('all')
 
+    print(keywords)
+
     if len(keywords) > 1:
         filters.append(babycenterdb.filter.TextFilter(value_list=keywords))
     elif len(keywords) == 1:
@@ -46,8 +48,10 @@ class QueryWrapper:
     return filters
 
   def execute(self) -> dict:
-    return pd.DataFrame(self.query.execute()).to_dict(orient='records')
-
+    data = pd.DataFrame(self.query.execute())
+    data.fillna(int(0), inplace=True)
+    return data.to_dict(orient='records')
+  
 class QueryFactory:
   def __init__(self):
     pass

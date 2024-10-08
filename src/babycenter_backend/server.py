@@ -1,5 +1,4 @@
 from flask import Flask, request, jsonify
-import paramiko
 from flask_cors import CORS
 from babycenter_backend.handler import RequestHandler
 
