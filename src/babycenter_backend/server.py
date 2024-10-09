@@ -1,11 +1,9 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from babycenter_backend.handler import RequestHandler
+from babycenter_backend.user import User
 
 handler = RequestHandler()
-query_factory = handler.query_factory
-topic_factory = handler.topic_factory
-user_factory = handler.user_factory
 
 app = Flask(__name__)
 CORS(app)  # This will enable CORS for all routes and origins
@@ -25,7 +23,7 @@ def query():
         num_documents = request.args.get('num_documents', type=int)
 
         # create user
-        user = user_factory.create_user()
+        user = User()
         user.query_created = True
         handler.users[user.id] = user
 

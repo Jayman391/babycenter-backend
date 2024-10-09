@@ -27,7 +27,8 @@ class QueryWrapper:
     filters.append(babycenterdb.filter.DateFilter(floor=start_date, ceiling=end_date))
     # Keywords Filter
     keywords = params['keywords']
-    keywords.remove('all')
+    if len(keywords) == 1 and keywords[0] == 'all':
+      keywords.remove('all')
 
     print(keywords)
 
@@ -37,14 +38,14 @@ class QueryWrapper:
         filters.append(babycenterdb.filter.TextFilter(value=keywords[0]))
     # Groups Filter
     groups = params['groups']
-    groups.remove('all')
+    if len(groups) == 1 and groups[0] == 'all':
+      groups.remove('all')
 
     if len(groups) > 1:
         filters.append(babycenterdb.filter.GroupFilter(value_list=groups))
     elif len(groups) == 1:
         filters.append(babycenterdb.filter.GroupFilter(value=groups[0]))
     # Number of Comments Filter
-    # Number of Comments Filter    
     num_comments = int(params['num_comments'])
 
     if num_comments > 0 and self.query_type == 'posts':
@@ -59,9 +60,3 @@ class QueryWrapper:
     data['_id'] = data['_id'].astype(str)
     data = data.to_dict(orient='records')
     return data
-  
-class QueryFactory:
-  def __init__(self):
-    pass
-  def create_query(self, params):
-    return QueryWrapper(params)
