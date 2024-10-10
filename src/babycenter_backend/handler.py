@@ -1,7 +1,7 @@
 from werkzeug.datastructures import MultiDict
 
 from babycenter_backend.query import QueryWrapper
-from babycenter_backend.topic import Topic
+from babycenter_backend.topic import TopicWrapper
 from babycenter_backend.user import User
 
 
