@@ -23,6 +23,6 @@ class RequestHandler:
         request.pop("user_id")
 
         if request_type == "query":
-            query = QueryWrapper(request)
+            query = QueryWrapper(**request)
             user.query_data = user.runner.get_data(query)
             return user.query_data

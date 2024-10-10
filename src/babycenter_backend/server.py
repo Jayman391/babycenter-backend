@@ -14,8 +14,8 @@ def query():
     try:
         # Extract query parameters from request.args
         country = request.args.get('country')
-        start = request.args.get('start')
-        end = request.args.get('end')
+        start = request.args.get('startDate')
+        end = request.args.get('endDate')
         keywords = request.args.get('keywords', '').split(',')
         groups = request.args.get('groups', '').split(',')
         num_comments = request.args.get('num_comments', type=int)
@@ -32,8 +32,8 @@ def query():
             "request_type": "query",
             "user_id": user.id,
             "country": country,
-            "start": start,
-            "end": end,
+            "startDate": start,
+            "endDate": end,
             "keywords": keywords,
             "groups": groups,
             "num_comments": num_comments,
