@@ -3,6 +3,7 @@ from werkzeug.datastructures import MultiDict
 from babycenter_backend.query import QueryWrapper
 from babycenter_backend.topic import TopicWrapper
 from babycenter_backend.user import User
+from babycenter_backend.ngram import compute_ngrams
 
 
 class RequestHandler:
@@ -26,3 +27,6 @@ class RequestHandler:
             query = QueryWrapper(**request)
             user.query_data = user.runner.get_data(query)
             return user.query_data
+        elif request_type == "ngram":
+            user.ngram_data = compute_ngrams(request, user.query_data)
+            return user.ngram_data
