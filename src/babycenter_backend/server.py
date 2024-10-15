@@ -21,7 +21,6 @@ def query():
         num_comments = request.args.get('num_comments', type=int)
         post_or_comment = request.args.get('post_or_comment')
         num_documents = request.args.get('num_documents', type=int)
-
         # create user
         user = User()
         user.query_created = True
@@ -46,6 +45,31 @@ def query():
 
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
+
+@app.route('/save', methods=['POST'])
+def save():
+    try:
+        user_id = 0
+        type = request.json.get('type')
+        name = request.json.get('name')
+        content = request.json.get('content')
+
+        params = {
+            "request_type": "save",
+            "user_id": user_id,
+            "type": type,
+            "name": name,
+            "content": content
+        }
+
+        handler.handle(params)
+
+        return jsonify({"status": "success", "message": "Data saved successfully"})
+    
+    except Exception as e:
+
+        return jsonify({"status": "error", "message": str(e)})
+
 
 
 # Refactored /topic route to use request.args
@@ -97,6 +121,8 @@ def ngram():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
 
+
+        
 
 """
 @app.route("/auth/<username>/<password>", methods=['GET'])

@@ -3,11 +3,15 @@ from werkzeug.datastructures import MultiDict
 from babycenter_backend.query import QueryWrapper
 from babycenter_backend.topic import TopicWrapper
 from babycenter_backend.user import User
+from babycenterdb.post import Post
+
+import json
+
 
 
 class RequestHandler:
     def __init__(self):
-        self.request_types = ["query", "topic", "ngram", "precomputed"]
+        self.request_types = ["query", "topic", "ngram", "load", "save"]
         self.users = {}
 
     def handle(self, request : MultiDict):
@@ -18,7 +22,11 @@ class RequestHandler:
 
         request.pop("request_type")
 
-        user = self.users[request["user_id"]]
+        id = request["user_id"]
+
+        if id in self.users:
+
+            user = self.users[id]
 
         request.pop("user_id")
 
@@ -26,3 +34,8 @@ class RequestHandler:
             query = QueryWrapper(**request)
             user.query_data = user.runner.get_data(query)
             return user.query_data
+        elif request_type == "save":
+            post = Post(request) 
+            post.save()
+            
+            
