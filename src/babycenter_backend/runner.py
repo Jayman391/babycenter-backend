@@ -1,4 +1,4 @@
-from babycenter_backend.query import QueryWrapper
+from babycenter_backend.query import QueryWrapper, Loader
 from babycenter_backend.topic import TopicWrapper
 from babycenter_backend.ngram import compute_ngrams
 from typing import Dict, List 
@@ -12,6 +12,6 @@ class Runner:
     pass
   def compute_ngrams(self, content : Dict) -> Dict[str, List[int]]:
     pass
-  def get_precomputed(self, content : Dict) -> Dict[str, Dict[str, str]]:
-    pass
+  def get_precomputed(self, loader : Loader) -> Dict[str, Dict[str, str]]:
+    return loader.execute()
 

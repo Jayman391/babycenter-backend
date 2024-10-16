@@ -115,3 +115,43 @@ class QueryWrapper(BaseModel):
         data.fillna(0, inplace=True)
         data['_id'] = data['_id'].astype(str)
         return data.to_dict(orient='records')
+    
+
+class Loader(BaseModel):
+    computed_type: str
+    name: str
+
+    """
+    @model_validator(mode='before')
+    @classmethod
+    def validate(cls, values):
+        # Validate type             
+        computed_type = values.get('computed_type')
+        if computed_type not in ['query', 'ngram', 'topic']:
+            raise ValueError('Type must be either "query", "ngram", or "topic"')
+        
+        name = values.get('name')
+        if not isinstance(name, str):
+            raise ValueError('Name must be a string')
+        return values
+    """
+    
+    def build_filters(self) -> list:
+        filters = []
+        if self.name != 'all':
+            filters.append(babycenterdb.filter.IDFilter(value=self.name))
+
+        # Try passing computed_type directly
+        filters.append(babycenterdb.filter.TypeFilter(value=self.computed_type))
+        return filters
+
+    
+    def execute(self) -> dict:
+        collection = 'precomputed'
+        filters = self.build_filters()
+        query = Query(collection=collection, filters=filters)
+        data = pd.DataFrame(query.execute())
+        data.fillna(0, inplace=True)
+        data['_id'] = data['_id'].astype(str)
+        return data.to_dict(orient='records')
+        

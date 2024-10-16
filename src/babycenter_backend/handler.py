@@ -1,10 +1,11 @@
 from werkzeug.datastructures import MultiDict
 
-from babycenter_backend.query import QueryWrapper
+from babycenter_backend.query import QueryWrapper, Loader
 from babycenter_backend.topic import TopicWrapper
 from babycenter_backend.user import User
-from babycenterdb.post import Post
+from babycenter_backend.runner import Runner
 
+from babycenterdb.post import Post
 import json
 
 
@@ -37,5 +38,10 @@ class RequestHandler:
         elif request_type == "save":
             post = Post(request) 
             post.save()
+        elif request_type == "load":
+            loader = Loader(**request)
+            data = Runner().get_precomputed(loader)
+            print(data)
+            return data
             
             

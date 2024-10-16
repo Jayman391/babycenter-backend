@@ -58,7 +58,7 @@ def save():
             "request_type": "save",
             "user_id": user_id,
             "type": type,
-            "name": name,
+            "_id": name,
             "content": content
         }
 
@@ -68,6 +68,28 @@ def save():
     
     except Exception as e:
 
+        return jsonify({"status": "error", "message": str(e)})
+    
+@app.route('/load', methods=['GET'])
+def load():
+    try:
+        user_id = 0
+        computed_type = request.args.get('computed_type')
+        name = request.args.get('name')
+        all = request.args.get('all')
+
+        params = {
+            "request_type": "load",
+            "user_id": user_id,
+            "computed_type": computed_type,
+            "name": name,
+            "all": all
+        }
+
+        response = handler.handle(params)
+        return jsonify({"status": "success", "message": "Data loaded successfully", "content": response})
+
+    except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
 
 
