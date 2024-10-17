@@ -125,21 +125,22 @@ def ngram():
     try:
         # Extract query parameters from request.args
         user_id = request.args.get('user_id')
-        country = request.args.get('country')
-        start = request.args.get('start')
-        end = request.args.get('end')
+        start = request.args.get('startDate')
+        end = request.args.get('endDate')
         keywords = request.args.get('keywords', '').split(',')
 
-        return jsonify({
-            "status": "success",
-            "message": "Visualization successful",
-            "content": {
-                "country": country,
-                "start": start,
-                "end": end,
-                "keywords": keywords
-            }
-        })
+        params = {
+            "request_type": "ngram",
+            "user_id": user_id,
+            "startDate": start,
+            "endDate": end,
+            "keywords": keywords
+        }
+
+        response = handler.handle(params)
+
+        return jsonify({"status": "success", "message": "Ngram computation successful", "content": response})
+
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
 
