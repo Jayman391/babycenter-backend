@@ -26,13 +26,13 @@ class RequestHandler:
 
         request.pop("request_type")
 
-        id = request["user_id"]
-
-        if id in self.users:
-            user = self.users[id]
+        if request['user_id'] is not None:        
+            id = request["user_id"]
+            if id in self.users:
+                user = self.users[id]
         else:
             user = User()
-            self.users[id] = user
+            self.users[user.id] = user
 
         request.pop("user_id")
 
