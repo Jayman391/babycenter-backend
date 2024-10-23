@@ -1,60 +1,46 @@
-from werkzeug.datastructures import MultiDict
-
 from babycenter_backend.query import QueryWrapper, Loader
-from babycenter_backend.topic import TopicWrapper
 from babycenter_backend.user import User
 from babycenter_backend.runner import Runner
-
 from babycenter_backend.ngram import compute_ngrams
-
 from babycenterdb.post import Post
-import json
-
-
 
 class RequestHandler:
     def __init__(self):
         self.request_types = ["query", "topic", "ngram", "load", "save"]
         self.users = {}
 
-    def handle(self, request : MultiDict):
-
+    def handle(self, request):
         if request["request_type"] not in self.request_types:
             raise ValueError("Invalid request type")
-        
-        request_type = request["request_type"]
 
-        request.pop("request_type")
+        request_type = request.pop("request_type")
+        user_id = request.pop("user_id", None)
 
-        if request['user_id'] is not None:        
-            id = request["user_id"]
-            if id in self.users:
-                user = self.users[id]
-        else:
-            user = User()
-            self.users[user.id] = user
-
-        request.pop("user_id")
+        user = None
+        if user_id:
+            # User ID corresponds to username
+            if user_id in self.users:
+                user = self.users[user_id]
+            else:
+                user = User(username=user_id)
+                self.users[user_id] = user
 
         if request_type == "query":
+            if not user:
+                raise ValueError("User ID is required for query")
             query = QueryWrapper(**request)
             user.query_data = user.runner.get_data(query)
             return user.query_data
         elif request_type == "save":
-            post = Post(request) 
+            post = Post(request)
             post.save()
+            return {"status": "success"} 
         elif request_type == "load":
             loader = Loader(**request)
             data = Runner().get_precomputed(loader)
             return data
         elif request_type == "ngram":
-            if id != 0:
-                user = self.users[id]
-                user.ngram_data = compute_ngrams(user.query_data, request)
-                return user.ngram_data
-            else:
-                computed_type = 'ngram'
-                name = 'full'
-                loader = Loader(computed_type=computed_type, name=name)
-                data = Runner().get_precomputed(loader)
-                return compute_ngrams(data, request)
+            if not user:
+                raise ValueError("User ID is required for ngram computation")
+            user.ngram_data = compute_ngrams(user.query_data, request)
+            return user.ngram_data

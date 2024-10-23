@@ -8,10 +8,12 @@ handler = RequestHandler()
 app = Flask(__name__)
 CORS(app)  # This will enable CORS for all routes and origins
 
-# Refactored /query route to use request.args instead of URL parameters
 @app.route('/query', methods=['GET'])
 def query():
     try:
+        user_id = request.args.get('user_id')
+        if not user_id:
+            raise ValueError("User ID is required.")
         # Extract query parameters from request.args
         country = request.args.get('country')
         start = request.args.get('startDate')
@@ -21,10 +23,15 @@ def query():
         num_comments = request.args.get('num_comments', type=int)
         post_or_comment = request.args.get('post_or_comment')
         num_documents = request.args.get('num_documents', type=int)
-        # create user
-        user = User()
+
+
+        # Create or retrieve user
+        if user_id in handler.users:
+            user = handler.users[user_id]
+        else:
+            user = User(username=user_id)
+            handler.users[user_id] = user
         user.query_created = True
-        handler.users[user.id] = user
 
         # Construct params for handler
         params = {
@@ -49,17 +56,20 @@ def query():
 @app.route('/save', methods=['POST'])
 def save():
     try:
-        user_id = 0
-        type = request.json.get('type')
-        name = request.json.get('name')
-        content = request.json.get('content')
+        data = request.json
+        user_id = data.get('content', {}).get('userId')  # Extract userId from content
+        post_id = data.get('_id')  # Extract the unique _id field
 
+        if not post_id or not user_id:
+            raise ValueError("Invalid save request: Missing _id or userId.")
+
+        # Handle the save logic using the provided _id and content
         params = {
             "request_type": "save",
             "user_id": user_id,
-            "type": type,
-            "_id": name,
-            "content": content
+            "_id": post_id,
+            "type": data.get('type'),
+            "content": data.get('content'),
         }
 
         handler.handle(params)
@@ -67,23 +77,21 @@ def save():
         return jsonify({"status": "success", "message": "Data saved successfully"})
     
     except Exception as e:
-
         return jsonify({"status": "error", "message": str(e)})
+
     
 @app.route('/load', methods=['GET'])
 def load():
     try:
-        user_id = 0
+        user_id = request.args.get('user_id', None)
         computed_type = request.args.get('computed_type')
         name = request.args.get('name')
-        all = request.args.get('all')
 
         params = {
             "request_type": "load",
             "user_id": user_id,
             "computed_type": computed_type,
             "name": name,
-            "all": all
         }
 
         response = handler.handle(params)
@@ -92,39 +100,13 @@ def load():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
 
-
-
-# Refactored /topic route to use request.args
-@app.route('/topic', methods=['GET'])
-def topic():
-    try:
-        # Extract query parameters from request.args
-        user_id = request.args.get('user_id')
-        embedding = request.args.get('embedding')
-        dimred = request.args.get('dimred')
-        clustering = request.args.get('clustering')
-        vectorizer = request.args.get('vectorizer')
-
-        return jsonify({
-            "status": "success",
-            "message": "Topic modeling successful",
-            "content": {
-                "embedding": embedding,
-                "dimred": dimred,
-                "clustering": clustering,
-                "vectorizer": vectorizer,
-            }
-        })
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)})
-
-
-# Refactored /ngram route to use request.args
 @app.route('/ngram', methods=['GET'])
 def ngram():
     try:
         # Extract query parameters from request.args
         user_id = request.args.get('user_id')
+        if not user_id:
+            raise ValueError("User ID is required.")
         start = request.args.get('startDate')
         end = request.args.get('endDate')
         keywords = request.args.get('keywords', '').split(',')
@@ -143,18 +125,3 @@ def ngram():
 
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
-
-
-        
-
-"""
-@app.route("/auth/<username>/<password>", methods=['GET'])
-def auth(username, password):
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    try:
-        ssh.connect('vacc-user1.uvm.edu', username=username, password=password)
-        return jsonify({"status": "success", "message": "Authentication successful"})
-    except Exception as e:
-        return jsonify({"status": "error", "message": e})
-"""

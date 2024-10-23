@@ -139,8 +139,8 @@ class Loader(BaseModel):
     def build_filters(self) -> list:
         filters = []
         if self.name != 'all':
-            filters.append(babycenterdb.filter.IDFilter(value=self.name))
-
+            value = {'$regex' : self.name}
+            filters.append(babycenterdb.filter.IDFilter(value=value))
         # Try passing computed_type directly
         filters.append(babycenterdb.filter.TypeFilter(value=self.computed_type))
         return filters

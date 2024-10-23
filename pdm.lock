@@ -41,7 +41,7 @@ dependencies = [
     "transformers>=4.44.2",
 ]
 files = [
-    {file = "babycenterdb-0.1.0-py3-none-any.whl", hash = "sha256:6980ad5a9b7e06ab0be531510571f865650aaa58366a8a89872bf7556c293ae3"},
+    {file = "babycenterdb-0.1.0-py3-none-any.whl", hash = "sha256:322b3da5e7bdaf9b6f15b8a829b5cc5b788b8c8108d460e822ba249dfd2268d0"},
 ]
 
 [[package]]
