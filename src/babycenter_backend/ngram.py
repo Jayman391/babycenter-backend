@@ -48,6 +48,29 @@ def compute_ngrams(data: list, params: dict) -> dict:
                 elif not ngrams:
                     dates[date_str][f'{n}-gram'][chunk] += 1
 
+    # Now compute ranks
+    for date_str in dates:
+        for n in dates[date_str]:
+            # n is like '1-gram', '2-gram', etc.
+            # counts is a Counter
+            counts = dates[date_str][n]
+            # Sort n-grams by count descending
+            sorted_ngrams = counts.most_common()
+            # Assign ranks
+            ranks = {}
+            current_rank = 1
+            previous_count = None
+            for idx, (ngram, count) in enumerate(sorted_ngrams):
+                if count != previous_count:
+                    current_rank = idx + 1  # +1 to start from 1
+                    previous_count = count
+                ranks[ngram] = current_rank
+            # Store counts and ranks
+            dates[date_str][n] = {
+                'counts': dict(counts),
+                'ranks': ranks
+            }
+
     return dates
 
 def chunk_text(text: str, n: int = 1):
