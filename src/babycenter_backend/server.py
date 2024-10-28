@@ -83,16 +83,15 @@ def save():
 @app.route('/load', methods=['GET'])
 def load():
     try:
-        user_id = request.args.get('user_id', None)
+        
         computed_type = request.args.get('computed_type')
-        name = request.args.get('name')
+        user_id = request.args.get('user_id')
 
         params = {
             "request_type": "load",
             "user_id": user_id,
             "computed_type": computed_type,
-            "name": name,
-        }
+         }
 
         response = handler.handle(params)
         return jsonify({"status": "success", "message": "Data loaded successfully", "content": response})
