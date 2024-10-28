@@ -1,0 +1,1 @@
+openapi-generator generate -i responseHandler.yaml -g python-flask -o babycenter-backend
