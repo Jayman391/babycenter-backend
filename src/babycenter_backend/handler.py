@@ -16,7 +16,6 @@ class RequestHandler:
         request_type = request.pop("request_type")
         user_id = request.pop("user_id", None)
 
-        user = None
         if user_id:
             # User ID corresponds to username
             if user_id in self.users:
@@ -24,10 +23,10 @@ class RequestHandler:
             else:
                 user = User(username=user_id)
                 self.users[user_id] = user
-
+        else:
+            user = User()
+        
         if request_type == "query":
-            if not user:
-                raise ValueError("User ID is required for query")
             query = QueryWrapper(**request)
             user.query_data = user.runner.get_data(query)
             return user.query_data
@@ -36,11 +35,10 @@ class RequestHandler:
             post.save()
             return {"status": "success"} 
         elif request_type == "load":
+            request['name'] = user_id
             loader = Loader(**request)
-            data = Runner().get_precomputed(loader)
+            data = user.runner.get_precomputed(loader)
             return data
         elif request_type == "ngram":
-            if not user:
-                raise ValueError("User ID is required for ngram computation")
             user.ngram_data = compute_ngrams(user.query_data, request)
             return user.ngram_data
