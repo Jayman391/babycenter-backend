@@ -2,125 +2,165 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from babycenter_backend.handler import RequestHandler
 from babycenter_backend.user import User
+from flask_wtf import FlaskForm
+from wtforms import StringField, IntegerField
+from wtforms.validators import DataRequired, Optional
+from werkzeug.datastructures import MultiDict
+import json
 
 handler = RequestHandler()
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'your_secret_key_here'  # Necessary for WTForms
+app.config['WTF_CSRF_ENABLED'] = False  # Disable CSRF for API requests
 CORS(app)  # This will enable CORS for all routes and origins
+
+# Define WTForms forms for validation
+class QueryForm(FlaskForm):
+    user_id = StringField('user_id', validators=[DataRequired()])
+    country = StringField('country', validators=[DataRequired()])
+    startDate = StringField('startDate', validators=[DataRequired()])
+    endDate = StringField('endDate', validators=[DataRequired()])
+    keywords = StringField('keywords', validators=[Optional()])
+    groups = StringField('groups', validators=[Optional()])
+    num_comments = IntegerField('num_comments', validators=[DataRequired()])
+    post_or_comment = StringField('post_or_comment', validators=[DataRequired()])
+    num_documents = IntegerField('num_documents', validators=[DataRequired()])
+
+class SaveForm(FlaskForm):
+    type = StringField('type', validators=[DataRequired()])
+    _id = StringField('_id', validators=[DataRequired()])
+    content = StringField('content', validators=[DataRequired()])
+
+class LoadForm(FlaskForm):
+    user_id = StringField('user_id', validators=[DataRequired()])
+    computed_type = StringField('computed_type', validators=[DataRequired()])
+
+class NgramForm(FlaskForm):
+    user_id = StringField('user_id', validators=[DataRequired()])
+    startDate = StringField('startDate', validators=[DataRequired()])
+    endDate = StringField('endDate', validators=[DataRequired()])
+    keywords = StringField('keywords', validators=[Optional()])
 
 @app.route('/query', methods=['GET'])
 def query():
-    try:
-        user_id = request.args.get('user_id')
-        if not user_id:
-            raise ValueError("User ID is required.")
-        # Extract query parameters from request.args
-        country = request.args.get('country')
-        start = request.args.get('startDate')
-        end = request.args.get('endDate')
-        keywords = request.args.get('keywords', '').split(',')
-        groups = request.args.get('groups', '').split(',')
-        num_comments = request.args.get('num_comments', type=int)
-        post_or_comment = request.args.get('post_or_comment')
-        num_documents = request.args.get('num_documents', type=int)
+    form = QueryForm(request.args)
+    if form.validate():
+        try:
+            user_id = form.user_id.data
+            # Create or retrieve user
+            if user_id in handler.users:
+                user = handler.users[user_id]
+            else:
+                user = User(username=user_id)
+                handler.users[user_id] = user
+            user.query_created = True
 
+            # Construct params for handler
+            params = {
+                "request_type": "query",
+                "user_id": user_id,
+                "country": form.country.data,
+                "startDate": form.startDate.data,
+                "endDate": form.endDate.data,
+                "keywords": form.keywords.data.split(',') if form.keywords.data else [],
+                "groups": form.groups.data.split(',') if form.groups.data else [],
+                "num_comments": form.num_comments.data,
+                "post_or_comment": form.post_or_comment.data,
+                "num_documents": form.num_documents.data
+            }
 
-        # Create or retrieve user
-        if user_id in handler.users:
-            user = handler.users[user_id]
-        else:
-            user = User(username=user_id)
-            handler.users[user_id] = user
-        user.query_created = True
+            response = handler.handle(params)
+            return jsonify({"user": user.id, "response": response})
 
-        # Construct params for handler
-        params = {
-            "request_type": "query",
-            "user_id": user.id,
-            "country": country,
-            "startDate": start,
-            "endDate": end,
-            "keywords": keywords,
-            "groups": groups,
-            "num_comments": num_comments,
-            "post_or_comment": post_or_comment,
-            "num_documents": num_documents
-        }
-
-        response = handler.handle(params)
-        return jsonify({"user": user.id, "response": response})
-
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)})
+        except Exception as e:
+            return jsonify({"status": "error", "message": str(e)})
+    else:
+        return jsonify({"status": "error", "message": form.errors})
+    
+from werkzeug.datastructures import MultiDict
+import json
 
 @app.route('/save', methods=['POST'])
 def save():
     try:
+        # Extract JSON data from the request
         data = request.json
-        user_id = data.get('content', {}).get('userId')  # Extract userId from content
-        post_id = data.get('_id')  # Extract the unique _id field
+        print("Received Data:", data)  # Debugging output
 
-        if not post_id or not user_id:
-            raise ValueError("Invalid save request: Missing _id or userId.")
-
-        # Handle the save logic using the provided _id and content
-        params = {
-            "request_type": "save",
-            "user_id": user_id,
-            "_id": post_id,
+        # Flatten the data for WTForms form processing
+        val_data = {
             "type": data.get('type'),
-            "content": data.get('content'),
+            "_id": data.get('_id'),
+            "content": json.dumps(data.get('content'))  # Convert content to string
         }
 
-        handler.handle(params)
+        print("Form Input Data:", val_data)  # Debugging output
 
-        return jsonify({"status": "success", "message": "Data saved successfully"})
-    
+        # Bind the flattened data to the form
+        form = SaveForm(MultiDict(val_data))
+
+        # Validate the form input
+        if form.validate():
+            # Construct the parameters
+            params = {
+                "request_type": "save",
+                "user_id": data.get('userId'),
+                "_id": data.get('_id'),
+                "type": data.get('type'),
+                "content": data.get('content')
+            }
+
+            # Pass the parameters to the handler
+            handler.handle(params)
+
+            return jsonify({"status": "success", "message": "Data saved successfully"})
+        else:
+            return jsonify({"status": "error", "message": form.errors})
+
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
 
-    
+   
+
+
 @app.route('/load', methods=['GET'])
 def load():
-    try:
-        
-        computed_type = request.args.get('computed_type')
-        user_id = request.args.get('user_id')
+    form = LoadForm(request.args)
+    if form.validate():
+        try: 
+            params = {
+                "request_type": "load",
+                "user_id": form.user_id.data,
+                "computed_type": form.computed_type.data,
+            }
 
-        params = {
-            "request_type": "load",
-            "user_id": user_id,
-            "computed_type": computed_type,
-         }
+            response = handler.handle(params)
+            return jsonify({"status": "success", "message": "Data loaded successfully", "content": response})
 
-        response = handler.handle(params)
-        return jsonify({"status": "success", "message": "Data loaded successfully", "content": response})
-
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)})
+        except Exception as e:
+            return jsonify({"status": "error", "message": str(e)})
+    else:
+        return jsonify({"status": "error", "message": form.errors})
 
 @app.route('/ngram', methods=['GET'])
 def ngram():
-    try:
-        # Extract query parameters from request.args
-        user_id = request.args.get('user_id')
-        if not user_id:
-            raise ValueError("User ID is required.")
-        start = request.args.get('startDate')
-        end = request.args.get('endDate')
-        keywords = request.args.get('keywords', '').split(',')
+    form = NgramForm(request.args)
+    if form.validate():
+        try:
+            params = {
+                "request_type": "ngram",
+                "user_id": form.user_id.data,
+                "startDate": form.startDate.data,
+                "endDate": form.endDate.data,
+                "keywords": form.keywords.data.split(',') if form.keywords.data else []
+            }
 
-        params = {
-            "request_type": "ngram",
-            "user_id": user_id,
-            "startDate": start,
-            "endDate": end,
-            "keywords": keywords
-        }
+            response = handler.handle(params)
 
-        response = handler.handle(params)
+            return jsonify({"status": "success", "message": "Ngram computation successful", "content": response})
 
-        return jsonify({"status": "success", "message": "Ngram computation successful", "content": response})
-
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)})
+        except Exception as e:
+            return jsonify({"status": "error", "message": str(e)})
+    else:
+        return jsonify({"status": "error", "message": form.errors})
