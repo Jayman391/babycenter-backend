@@ -2,7 +2,7 @@ from babycenter_backend.query import QueryWrapper, Loader
 from babycenter_backend.user import User
 from babycenter_backend.runner import Runner
 from babycenter_backend.ngram import compute_ngrams
-from babycenterdb.post import Post
+from babycenter_backend.post import Post
 
 class RequestHandler:
     def __init__(self):
