@@ -11,7 +11,7 @@ import json
 handler = RequestHandler()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your_secret_key_here'  # Necessary for WTForms
+app.config['SECRET_KEY'] = 'placeholder'  # Necessary for WTForms
 app.config['WTF_CSRF_ENABLED'] = False  # Disable CSRF for API requests
 CORS(app)  # This will enable CORS for all routes and origins
 
@@ -106,9 +106,9 @@ def save():
             params = {
                 "request_type": "save",
                 "user_id": data.get('userId'),
-                "_id": data.get('_id'),
-                "type": data.get('type'),
-                "content": data.get('content')
+                "_id": val_data['_id'],
+                "type": val_data['type'],
+                "content": val_data['content']
             }
 
             # Pass the parameters to the handler

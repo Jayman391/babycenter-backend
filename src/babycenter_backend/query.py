@@ -121,20 +121,20 @@ class Loader(BaseModel):
     computed_type: str
     name: str
 
-    """
+    
     @model_validator(mode='before')
     @classmethod
     def validate(cls, values):
         # Validate type             
         computed_type = values.get('computed_type')
-        if computed_type not in ['query', 'ngram', 'topic']:
+        if computed_type not in ['query', 'ngram', 'topic','user']:
             raise ValueError('Type must be either "query", "ngram", or "topic"')
         
         name = values.get('name')
         if not isinstance(name, str):
             raise ValueError('Name must be a string')
         return values
-    """
+    
     
     def build_filters(self) -> list:
         filters = []

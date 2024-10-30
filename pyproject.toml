@@ -20,6 +20,8 @@ dependencies = [
     "functools>=0.5",
     "wtforms>=3.2.1",
     "flask-wtf>=1.2.2",
+    "pytest>=8.3.3",
+    "black>=24.10.0",
 ]
 requires-python = ">=3.12"
 readme = "README.md"

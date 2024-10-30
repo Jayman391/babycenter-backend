@@ -26,6 +26,8 @@ class RequestHandler:
         else:
             user = User()
             user_id = user.id
+            self.users[user_id] = user
+
         
         if request_type == "query":
             query = QueryWrapper(**request)
