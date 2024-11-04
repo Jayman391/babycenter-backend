@@ -5,6 +5,7 @@ import numpy as np
 
 def compute_ngrams(data: list, params: dict) -> dict:
     dates = {}
+    full_corpus = {}
 
     ngrams = params["keywords"]
     ns = [1]
@@ -17,6 +18,10 @@ def compute_ngrams(data: list, params: dict) -> dict:
         if not ngrams:
             ngrams = []
     ns = np.unique(ns)
+
+    # Initialize full corpus counters for each n
+    for n in ns:
+        full_corpus[f'{n}-gram'] = Counter()
 
     for doc in data:
         # Ensure date is a datetime object
@@ -45,33 +50,47 @@ def compute_ngrams(data: list, params: dict) -> dict:
             for chunk in chunks:
                 if ngrams and chunk in ngrams:
                     dates[date_str][f'{n}-gram'][chunk] += 1
+                    full_corpus[f'{n}-gram'][chunk] += 1
                 elif not ngrams:
                     dates[date_str][f'{n}-gram'][chunk] += 1
+                    full_corpus[f'{n}-gram'][chunk] += 1
 
-    # Now compute ranks
+    # Compute ranks for each date
     for date_str in dates:
         for n in dates[date_str]:
-            # n is like '1-gram', '2-gram', etc.
-            # counts is a Counter
             counts = dates[date_str][n]
-            # Sort n-grams by count descending
             sorted_ngrams = counts.most_common()
-            # Assign ranks
             ranks = {}
             current_rank = 1
             previous_count = None
             for idx, (ngram, count) in enumerate(sorted_ngrams):
                 if count != previous_count:
-                    current_rank = idx + 1  # +1 to start from 1
+                    current_rank = idx + 1
                     previous_count = count
                 ranks[ngram] = current_rank
-            # Store counts and ranks
             dates[date_str][n] = {
                 'counts': dict(counts),
                 'ranks': ranks
             }
 
-    return dates
+    # Compute ranks for the full corpus
+    for n in full_corpus:
+        counts = full_corpus[n]
+        sorted_ngrams = counts.most_common()
+        ranks = {}
+        current_rank = 1
+        previous_count = None
+        for idx, (ngram, count) in enumerate(sorted_ngrams):
+            if count != previous_count:
+                current_rank = idx + 1
+                previous_count = count
+            ranks[ngram] = current_rank
+        full_corpus[n] = {
+            'counts': dict(counts),
+            'ranks': ranks
+        }
+
+    return {'dates': dates, 'full_corpus': full_corpus}
 
 def chunk_text(text: str, n: int = 1):
     words = text.split()

@@ -97,6 +97,8 @@ def save():
 
         print("Form Input Data:", val_data)  # Debugging output
 
+        val_data['content'] = json.loads(val_data['content'])
+
         # Bind the flattened data to the form
         form = SaveForm(MultiDict(val_data))
 
