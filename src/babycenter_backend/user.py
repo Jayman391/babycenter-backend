@@ -7,5 +7,4 @@ class User:
         self.runner = Runner()
         self.query_created = False
         self.query_data = {}
-        self.topic_data = {}
         self.ngram_data = {}

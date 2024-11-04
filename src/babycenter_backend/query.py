@@ -127,8 +127,8 @@ class Loader(BaseModel):
     def validate(cls, values):
         # Validate type             
         computed_type = values.get('computed_type')
-        if computed_type not in ['query', 'ngram', 'topic','user']:
-            raise ValueError('Type must be either "query", "ngram", or "topic"')
+        if computed_type not in ['query', 'ngram', 'user']:
+            raise ValueError('Type must be either "query", "ngram", or "user"')
         
         name = values.get('name')
         if not isinstance(name, str):

@@ -6,7 +6,7 @@ from babycenter_backend.post import Post
 
 class RequestHandler:
     def __init__(self):
-        self.request_types = ["query", "topic", "ngram", "load", "save"]
+        self.request_types = ["query", "ngram", "load", "save"]
         self.users = {}
 
     def handle(self, request):
@@ -43,5 +43,5 @@ class RequestHandler:
             data = user.runner.get_precomputed(loader)
             return data
         elif request_type == "ngram":
-            user.ngram_data = compute_ngrams(user.query_data, request)
+            user.ngram_data = user.runner.compute_ngrams(user.query_data, request)
             return user.ngram_data
