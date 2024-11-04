@@ -1,4 +1,4 @@
-from runner import Runner
+from babycenter_backend.runner import Runner
 from uuid import uuid4
 
 class User:
@@ -9,3 +9,11 @@ class User:
         self.query_data = {}
         self.topic_data = {}
         self.ngram_data = {}
+
+class UserFactory:
+    def __init__(self):
+        pass
+    def create_user(self):
+        return User()
+    def remove_user(self, user_id):
+        pass

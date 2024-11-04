@@ -1,11 +1,6 @@
-import bertopic
+#import bertopic
 
-class Topic:
+class TopicWrapper:
   def __init__(self):
     pass 
 
-class TopicFactory:
-  def __init__(self):
-    pass
-  def create_topic(self):
-    return Topic()

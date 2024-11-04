@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:344d4165cfcf1d0ad94a7a526c9fe8ae72ba5e7876523771439ed54a15bc0d50"
+content_hash = "sha256:033aca5e14c49ae42fa2b7d2be6c199b09d2ff7047b99e034f3fad3880519570"
 
 [[metadata.targets]]
 requires_python = ">=3.12"
@@ -28,7 +28,7 @@ files = [
 name = "babycenterdb"
 version = "0.1.0"
 requires_python = ">=3.11"
-path = "/Users/user/Desktop/babycenterdb-1.0.0-rc/dist/babycenterdb-0.1.0-py3-none-any.whl"
+path = "/Users/user/Desktop/babycenterdb/dist/babycenterdb-0.1.0-py3-none-any.whl"
 summary = "Default template for PDM package"
 groups = ["default"]
 dependencies = [
