@@ -15,13 +15,16 @@ dependencies = [
     "pandas>=2.2.3",
     "cryptography>=43.0.1",
     "pydantic>=2.9.2",
-    "babycenterdb @ file:///Users/user/Desktop/babycenterdb/dist/babycenterdb-0.1.0-py3-none-any.whl",
     "flask-validators>=1.0",
     "functools>=0.5",
     "wtforms>=3.2.1",
     "flask-wtf>=1.2.2",
     "pytest>=8.3.3",
     "black>=24.10.0",
+    "babycenterdb @ file:///Users/user/Desktop/babycenterdb/dist/babycenterdb-0.1.0-py3-none-any.whl",
+    "mysql>=0.0.3",
+    "mysql-connector-python>=9.1.0",
+    "ipykernel>=6.29.5",
 ]
 requires-python = ">=3.12"
 readme = "README.md"

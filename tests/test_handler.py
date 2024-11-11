@@ -76,7 +76,7 @@ class TestHandler(unittest.TestCase):
         id = uuid4().hex
         post_request = {
             "request_type": "save",
-            "_id": "testsave" + id,
+            "id": "testsave" + id,
             "type": "query",
             "content": {"test": "test"},
         }
@@ -84,7 +84,7 @@ class TestHandler(unittest.TestCase):
 
         get_request = {
             "request_type": "load",
-            "computed_type": "query",
+            "type": "query",
             "user_id": "testsave",
         }
         response = self.handler.handle(get_request)
