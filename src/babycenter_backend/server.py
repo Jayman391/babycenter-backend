@@ -4,7 +4,6 @@ from babycenter_backend.handler import RequestHandler
 from flask_wtf import FlaskForm
 from wtforms import StringField, IntegerField, FloatField
 from wtforms.validators import DataRequired, Optional
-from werkzeug.datastructures import MultiDict
 import json
 
 handler = RequestHandler()
@@ -18,19 +17,13 @@ CORS(app)  # This will enable CORS for all routes and origins
 class QueryForm(FlaskForm):
     sessionID = FloatField('sessionID', validators=[DataRequired()])
     country = StringField('country', validators=[DataRequired()])
-    startDate = StringField('startDate', validators=[DataRequired()])
-    endDate = StringField('endDate', validators=[DataRequired()])
+    startDate = StringField('startDate', validators=[Optional()])
+    endDate = StringField('endDate', validators=[Optional()])
     keywords = StringField('keywords', validators=[Optional()])
     groups = StringField('groups', validators=[Optional()])
     num_comments = IntegerField('num_comments', validators=[DataRequired()])
     post_or_comment = StringField('post_or_comment', validators=[DataRequired()])
     num_documents = IntegerField('num_documents', validators=[DataRequired()])
-
-class NgramForm(FlaskForm):
-    sessionID = FloatField('sessionID', validators=[DataRequired()])
-    startDate = StringField('startDate', validators=[DataRequired()])
-    endDate = StringField('endDate', validators=[DataRequired()])
-    keywords = StringField('keywords', validators=[Optional()])
 
 @app.route('/query', methods=['GET'])
 def query():
@@ -48,16 +41,23 @@ def query():
                 "groups": form.groups.data.split(',') if form.groups.data else [],
                 "num_comments": form.num_comments.data,
                 "post_or_comment": form.post_or_comment.data,
-                "num_documents": form.num_documents.data
+                "num_documents": form.num_documents.data,
+                "nodate" : False
             }
 
             response = handler.handle(params)
             return jsonify({"status": "success", "response": response})
 
         except Exception as e:
-            return jsonify({"status": "error", "message": str(e)})
+            return jsonify({"status": "process error", "message": str(e)})
     else:
-        return jsonify({"status": "error", "message": form.errors})
+        return jsonify({"status": "form error", "message": form.errors})
+    
+class NgramForm(FlaskForm):
+    sessionID = FloatField('sessionID', validators=[DataRequired()])
+    startDate = StringField('startDate', validators=[DataRequired()])
+    endDate = StringField('endDate', validators=[DataRequired()])
+    keywords = StringField('keywords', validators=[Optional()])
 
 @app.route('/ngram', methods=['GET'])
 def ngram():
@@ -77,6 +77,33 @@ def ngram():
             return jsonify({"status": "success", "message": "Ngram computation successful", "content": response})
 
         except Exception as e:
-            return jsonify({"status": "error", "message": str(e)})
+            return jsonify({"status": "process error", "message": str(e)})
     else:
-        return jsonify({"status": "error", "message": form.errors})
+        return jsonify({"status": "form error", "message": form.errors})
+
+class AllotaxForm(FlaskForm):
+    sessionID = FloatField('sessionID', validators=[DataRequired()])
+    alpha = FloatField('alpha', validators=[DataRequired()])
+    groups = StringField('groups', validators=[DataRequired()])
+
+@app.route('/allotax', methods=['GET'])
+def allotax():
+    form = AllotaxForm(request.args)
+    if form.validate():
+        try:
+            params = {
+                "request_type": "allotax",
+                "sessionID": form.sessionID.data,
+                "alpha": form.alpha.data,
+                "groups": form.groups.data.split(',')
+            }
+
+
+            response = handler.handle(params)
+
+            return jsonify({"status": "success", "message": "Allotax computation successful", "content": response})
+
+        except Exception as e:
+             return jsonify({"status": "process error", "message": str(e)})
+    else:
+        return jsonify({"status": "form error", "message": form.errors})

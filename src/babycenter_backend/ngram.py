@@ -25,11 +25,15 @@ def compute_ngrams(data: list, params: dict) -> dict:
 
     for doc in data:
         # Ensure date is a datetime object
-        if isinstance(doc["date"], str):
-            date_obj = datetime.strptime(doc["date"], '%Y-%m-%d')
-        else:
-            date_obj = doc["date"]
-        date_str = date_obj.strftime('%a, %d %b %Y %H:%M:%S')
+        try :
+            if isinstance(doc["date"], str):
+                date_obj = datetime.strptime(doc["date"], '%d-%m-%y')
+            else:
+                date_obj = doc["date"]
+            date_str = date_obj.strftime('%a, %d %b %Y %H:%M:%S')
+
+        except Exception:
+            continue
 
         if date_str not in dates:
             dates[date_str] = {}

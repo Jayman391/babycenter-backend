@@ -16,7 +16,12 @@ def test_calculate_divergences_basic():
         {"apple": 3, "banana": 2, "cherry": 1}
     ]
     alpha = 1
-    divergence_matrix = calculate_divergences(corpora, alpha)
+    divergence_matrix, ngram_index = calculate_divergences(corpora, alpha)
+
+    print(divergence_matrix)
+    print(np.sum(np.triu(divergence_matrix),axis=(1,2)) / len(corpora))
+
+    print(ngram_index)
 
     # assert diagonals are zero
     assert np.all(np.diag(divergence_matrix[0]) == 0), "Divergence within a single corpus should be zero"
@@ -29,7 +34,7 @@ def test_calculate_divergences_single_corpus():
     """Test calculate_divergences with a single corpus."""
     corpora = [{"apple": 1, "banana": 2}]
     alpha = 0.5
-    divergence_matrix = calculate_divergences(corpora, alpha)
+    divergence_matrix, _ = calculate_divergences(corpora, alpha)
 
     assert divergence_matrix.shape == (2, 1, 1), "Output shape should be (num_ngrams, 1, 1) for single corpus"
     assert np.all(divergence_matrix == 0), "Divergence within a single corpus should be zero"
@@ -41,7 +46,7 @@ def test_calculate_divergences_non_overlapping_ngrams():
         {"cherry": 1, "date": 2}
     ]
     alpha = 0.5
-    divergence_matrix = calculate_divergences(corpora, alpha)
+    divergence_matrix, _ = calculate_divergences(corpora, alpha)
 
     assert divergence_matrix.shape == (4, 2, 2), "Output shape should account for all unique ngrams"
     assert np.all(divergence_matrix >= 0), "All divergences should be non-negative"

@@ -64,8 +64,8 @@ class QueryWrapper(BaseModel):
             if len(groups) > 1 and groups[0] == 'all':
                 raise ValueError('Groups cannot be "all"')
             for group in groups:
-                if not isinstance(group, str) or not group.isalpha():
-                    raise ValueError('Groups must be alphanumeric strings')
+                if not isinstance(group, str):
+                    raise ValueError('Groups must be strings')
 
         # Validate num_comments
         num_comments = values.get('num_comments')
@@ -105,13 +105,16 @@ class QueryWrapper(BaseModel):
 
         if num_comments > 0 and self.post_or_comment == 'posts':
             filters.append(babycenterdb.filter.NumCommentsFilter(value=num_comments))
-
         return filters
 
-    def execute(self) -> dict:
+    def execute(self, nodate: bool = False) -> dict:
         filters = self.build_filters()
         query = Query(collection=self.post_or_comment, filters=filters, limit=self.num_documents)
+        if nodate :
+            query.filter_dict.pop('date')
         data = pd.DataFrame(query.execute())
         data.fillna(0, inplace=True)
-        data['_id'] = data['_id'].astype(str)
+         # Check if `_id` exists in the DataFrame before attempting to convert it
+        if '_id' in data.columns:
+            data['_id'] = data['_id'].astype(str)
         return data.to_dict(orient='records')

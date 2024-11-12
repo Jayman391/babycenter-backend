@@ -41,7 +41,7 @@ def calculate_divergences(corpora: List[Dict[str, int]], alpha: float) -> np.nda
   # Apply normalization
   divergence_matrix *= full_normalization
 
-  return divergence_matrix
+  return divergence_matrix, ngram_index
 
 def calculate_normalization(corpora: List[Dict[str, int]], alpha: float) -> float:
   """
