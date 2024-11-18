@@ -51,6 +51,7 @@ class RequestHandler:
             groups = request.pop("groups")
 
             corpora = []
+            group_ngram_data = {}
 
             # build query & ngram requests
 
@@ -101,23 +102,26 @@ class RequestHandler:
                     "keywords": ['all']
                 }
 
-                ngramData = self.handle(ngramParams)['full_corpus']
+                ngramData = self.handle(ngramParams)
 
-                ngrams = list(ngramData.keys())
-                ranks = [ngramData[ngram]['ranks'] for ngram in ngrams]
+                ngrams = list(ngramData['full_corpus'].keys())
+                ranks = [ngramData['full_corpus'][ngram]['ranks'] for ngram in ngrams]
 
+                group_ngram_data[group] = ngramData
+ 
                 corpora.append(ranks[0])
 
             divergence_matrix, ngram_index = calculate_divergences(corpora, request.get("alpha"))
 
-             # Serialize for JSON compatibility
+            # Serialize for JSON compatibility
             divergence_matrix_serialized = divergence_matrix.tolist()
 
             ngram_index_serialized = {key: list(value) if isinstance(value, np.ndarray) else value for key, value in ngram_index.items()}
 
             return {
                 "divergence_matrix": divergence_matrix_serialized,
-                "ngram_index": ngram_index_serialized
+                "ngram_index": ngram_index_serialized,
+                "group_ngram_data" : group_ngram_data
             }
 
                 

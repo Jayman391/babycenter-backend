@@ -1,17 +1,33 @@
+import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from babycenter_backend.handler import RequestHandler
+
+import sys 
+# add src to path
+sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
+from src.babycenter_backend.handler import RequestHandler
+
 from flask_wtf import FlaskForm
 from wtforms import StringField, IntegerField, FloatField
 from wtforms.validators import DataRequired, Optional
-import json
+import logging
 
+# Initialize handler
 handler = RequestHandler()
 
+# Initialize Flask app
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'placeholder'  # Necessary for WTForms
-app.config['WTF_CSRF_ENABLED'] = False  # Disable CSRF for API requests
-CORS(app)  # This will enable CORS for all routes and origins
+
+# Load configuration from environment variables
+app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'fallback-secret-key')
+app.config['WTF_CSRF_ENABLED'] = False  # Consider enabling CSRF in production for sensitive forms
+
+# Configure CORS
+CORS(app, resources={r"/api/*": {"origins": os.getenv('CORS_ALLOWED_ORIGINS', '*').split(',')}})
+
+# Configure logging
+logging.basicConfig(filename='app.log', level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+logger = logging.getLogger(__name__)
 
 # Define WTForms forms for validation
 class QueryForm(FlaskForm):
@@ -42,17 +58,18 @@ def query():
                 "num_comments": form.num_comments.data,
                 "post_or_comment": form.post_or_comment.data,
                 "num_documents": form.num_documents.data,
-                "nodate" : False
+                "nodate": False
             }
 
             response = handler.handle(params)
             return jsonify({"status": "success", "response": response})
 
         except Exception as e:
+            logger.error(f"Error processing query: {str(e)}")
             return jsonify({"status": "process error", "message": str(e)})
     else:
         return jsonify({"status": "form error", "message": form.errors})
-    
+
 class NgramForm(FlaskForm):
     sessionID = FloatField('sessionID', validators=[DataRequired()])
     startDate = StringField('startDate', validators=[DataRequired()])
@@ -77,6 +94,7 @@ def ngram():
             return jsonify({"status": "success", "message": "Ngram computation successful", "content": response})
 
         except Exception as e:
+            logger.error(f"Error processing ngram: {str(e)}")
             return jsonify({"status": "process error", "message": str(e)})
     else:
         return jsonify({"status": "form error", "message": form.errors})
@@ -98,12 +116,16 @@ def allotax():
                 "groups": form.groups.data.split(',')
             }
 
-
             response = handler.handle(params)
 
             return jsonify({"status": "success", "message": "Allotax computation successful", "content": response})
 
         except Exception as e:
-             return jsonify({"status": "process error", "message": str(e)})
+            logger.error(f"Error processing allotax: {str(e)}")
+            return jsonify({"status": "process error", "message": str(e)})
     else:
         return jsonify({"status": "form error", "message": form.errors})
+
+if __name__ == '__main__':
+    # Use a production WSGI server like Gunicorn in production instead of this
+    app.run(host='0.0.0.0', port=int(os.getenv('PORT', 8000)), debug=False)
